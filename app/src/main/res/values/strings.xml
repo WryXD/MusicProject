@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">MusicProject</string>
+    <string name="policy_title">"Bằng cách nhấn vào nút Tiếp tục, bạn đồng ý với chúng tôi "</string>
+    <string name="policy_1">"Điều khoản dịch vụ "</string>
+    <string name="policy_2">"Chính sách quyền riêng tư "</string>
+    <string name="passworld_title">"Mật khẩu phải có ít nhất "</string>
+    <string name="password_hint">8 ký tự</string>
+</resources>

@@ -1,0 +1,3 @@
+contains utility classes and functions that perform common tasks that can be used in various parts
+of the application. Organizing these functions and classes into a separate package helps keep the
+codebase clean and easier to maintain

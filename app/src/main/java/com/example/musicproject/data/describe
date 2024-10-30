@@ -1,0 +1,9 @@
+* Container abstract class database
+@Database(entities =["entities"::class], version = "version", exportSchema = false)
+* Container DAO
+@Dao
+
+@Volatile
+/**
+đảm bảo rằng mọi ghi dữ liệu vào biến đó sẽ được cập nhật ngay lập tức cho tất cả các luồng khác
+**/
