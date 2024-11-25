@@ -2,7 +2,6 @@ package com.example.musicproject.viewmodel.password
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.musicproject.utils.StringUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,37 +11,74 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PasswordViewModel @Inject constructor() : ViewModel() {
+class PasswordViewModel @Inject constructor(
+) : ViewModel() {
     private val _state = MutableStateFlow(PasswordState())
     val state = _state.asStateFlow()
 
-    fun onAction(action: PasswordActions) {
+    fun onAction(action: PasswordAction) {
         when (action) {
-            is PasswordActions.IsEnableButton -> {
-                viewModelScope.launch {
-                    val result = StringUtils.isPasswordValid(action.password)
-                    _state.update { it.copy(isEnableButton = result) }
-                }
-            }
 
-            is PasswordActions.IsShowingPassword -> {
-                viewModelScope.launch {
-                    _state.update { it.copy(isShowingPassword = !_state.value.isShowingPassword) }
-                }
-            }
+            is PasswordAction.IsShowingPassword -> isShowingPassword()
 
-            PasswordActions.OnBack -> {
-                viewModelScope.launch {
-                    _state.update { it.copy(isBack = true) }
-                }
-            }
+            is PasswordAction.OnBack -> onBack()
 
-            PasswordActions.OnNavigateTo -> {
-                viewModelScope.launch {
-                    _state.update { it.copy(isNavigate = true) }
-                    resetNavigationState()
-                }
+            is PasswordAction.OnNavigateTo -> onNavigateTo()
+
+            is PasswordAction.IsTrigger -> updateTrigger()
+
+            is PasswordAction.ResetTrigger -> resetTrigger()
+
+            is PasswordAction.Reset -> resetAll()
+        }
+    }
+
+    private fun resetAll() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isBack = false,
+                    isNavigate = false,
+                    isTrigger = false,
+                    isShowingPassword = false
+                )
             }
+        }
+    }
+
+    private fun isShowingPassword() {
+        viewModelScope.launch {
+            _state.update { it.copy(isShowingPassword = !_state.value.isShowingPassword) }
+        }
+    }
+
+    private fun onNavigateTo() {
+        viewModelScope.launch {
+            _state.update { it.copy(isNavigate = true) }
+            resetNavigationState()
+        }
+    }
+
+    private fun onBack() {
+        viewModelScope.launch {
+            _state.update { it.copy(isBack = true) }
+            resetBackState()
+        }
+    }
+
+    private fun resetTrigger() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isTrigger = false
+                )
+            }
+        }
+    }
+
+    private fun updateTrigger() {
+        viewModelScope.launch {
+            _state.update { it.copy(isTrigger = true) }
         }
     }
 
@@ -51,5 +87,13 @@ class PasswordViewModel @Inject constructor() : ViewModel() {
             delay(200)
             _state.update { it.copy(isNavigate = false) }
         }
+    }
+
+    private fun resetBackState() {
+        viewModelScope.launch {
+            delay(200)
+            _state.update { it.copy(isBack = false) }
+        }
+
     }
 }

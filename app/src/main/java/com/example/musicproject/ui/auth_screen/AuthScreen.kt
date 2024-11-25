@@ -1,6 +1,8 @@
 package com.example.musicproject.ui.auth_screen
 
 import android.util.Log
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,10 +13,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -24,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.musicproject.R
@@ -40,7 +43,6 @@ import com.example.musicproject.ui.theme.DarkWhite
 import com.example.musicproject.ui.theme.RobotoFont
 import com.example.musicproject.utils.NavigationUtils
 import com.example.musicproject.viewmodel.auth.AuthActions
-import com.example.musicproject.viewmodel.auth.AuthEvents
 import com.example.musicproject.viewmodel.auth.AuthState
 import com.example.musicproject.viewmodel.auth.AuthViewModel
 import com.example.musicproject.viewmodel.auth.UiState
@@ -54,26 +56,14 @@ fun AuthScreen(
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
     // ui state
     val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
-    // auth event
-    val authEvent by authViewModel.authEventsFlow.collectAsStateWithLifecycle(initialValue = null)
-    Log.e("Auth State", "State : $authState")
-    Log.e("UI State", "State : $uiState")
-    Log.e("Auth Screen", "Is Sign Up: ${authState.isSignUp}")
-    Log.e("Auth Screen", "Is Login : ${authState.isLogin}")
 
-    // Handle event
-    HandleEvent(
-        authEvent = authEvent,
-        navController = navController,
-        authViewModel = authViewModel
-
-    )
+    LaunchedEffect(authState) {
+        Log.e("AuthScreen", "AuthState : $authState")
+    }
 
     // Handle navigation
     HandleNavigation(
-        uiState = uiState,
-        navController = navController,
-        authViewModel = authViewModel
+        uiState = uiState, navController = navController, authViewModel = authViewModel
     )
 
 
@@ -82,7 +72,6 @@ fun AuthScreen(
         authState = authState,
         authViewModel = authViewModel,
     )
-
 
 }
 
@@ -95,7 +84,6 @@ private fun ScreenContent(
     Column(
         Modifier
             .fillMaxSize()
-            .background(Color.Black)
             .systemBarsPadding()
             .imePadding(),
         verticalArrangement = Arrangement.SpaceAround
@@ -106,26 +94,24 @@ private fun ScreenContent(
                 {
                     authViewModel.onAction(AuthActions.OnBack)
                 }
-            },
-            modifier = Modifier
-                .padding(horizontal = horizontalPadding)
+            }, modifier = Modifier.padding(start = horizontalPadding)
 
         )
+
         // Input email field
-        Column(Modifier.wrapContentSize()) {
+        Column(Modifier.wrapContentHeight()) {
             Title(
                 title = "Email của bạn là gì?",
                 modifier = Modifier.align(Alignment.CenterHorizontally)
 
             )
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(16.dp))
 
             Email(
                 value = authState.email,
                 onValueChange = {
                     authViewModel.onAction(AuthActions.UpdateEmail(it))
-                    authViewModel.onAction(AuthActions.IsSignUpValid(it))
                 },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.DarkGray,
@@ -151,11 +137,10 @@ private fun ScreenContent(
                 title = stringResource(R.string.policy_title),
                 policy1 = stringResource(R.string.policy_1),
                 policy2 = stringResource(R.string.policy_2),
-                modifier = Modifier
-                    .padding(horizontal = horizontalPadding)
+                modifier = Modifier.padding(horizontal = horizontalPadding)
             )
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(16.dp))
 
             AppButton(
                 onClick = remember {
@@ -164,7 +149,7 @@ private fun ScreenContent(
                     }
                 },
                 title = "Tiếp tục",
-                isEnable = authState.isEnableButton,
+                isEnable = authViewModel.enableEmailButton(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = DarkOrange,
                     contentColor = Color.Black,
@@ -182,38 +167,29 @@ private fun ScreenContent(
 }
 
 @Composable
-private fun HandleEvent(
-    authEvent: AuthEvents?,
-    navController: NavController,
-    authViewModel: AuthViewModel,
-) {
-    LaunchedEffect(authEvent) {
-        when (authEvent) {
-            AuthEvents.Error -> {
-                // show error
-            }
-
-            AuthEvents.Loading -> {
-                // show loading
-            }
-
-            AuthEvents.Success -> {
-                // show success
-            }
-
-            null -> {
-                // do nothing
-            }
-        }
-    }
-}
-
-@Composable
 private fun HandleNavigation(
     uiState: UiState,
     navController: NavController,
     authViewModel: AuthViewModel,
 ) {
+
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
+    val backCallback = remember {
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                authViewModel.onAction(AuthActions.OnBack)
+            }
+        }
+    }
+
+    DisposableEffect(backDispatcher) {
+        backDispatcher?.addCallback(backCallback)
+        onDispose {
+            backCallback.remove()
+        }
+    }
+
     LaunchedEffect(uiState) {
 
         when {

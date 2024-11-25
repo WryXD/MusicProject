@@ -54,6 +54,10 @@ fun BoardingScreen(
     // Collect UI state of boarding screen
     val uiState by viewModel.state.collectAsStateWithLifecycle()
 
+    LaunchedEffect(uiState) {
+        Log.e("Boarding Screen", "State : $uiState")
+    }
+
     // Data for boarding screen
     val pages = listOf(
         BoardingData.First, BoardingData.Second, BoardingData.Third
@@ -82,8 +86,6 @@ fun BoardingScreen(
         viewModel = viewModel,
         authViewModel = authViewModel
     )
-
-    Log.e("Boarding Screen", "State : $uiState")
 }
 
 @Composable

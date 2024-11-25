@@ -17,18 +17,15 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.musicproject.R
@@ -39,13 +36,14 @@ import com.example.musicproject.ui.custom_components.Password
 import com.example.musicproject.ui.custom_components.PasswordHint
 import com.example.musicproject.ui.custom_components.Placeholder
 import com.example.musicproject.ui.custom_components.Title
+import com.example.musicproject.ui.name_screen.LoadingDialog
 import com.example.musicproject.ui.theme.DarkOrange
 import com.example.musicproject.ui.theme.DarkWhite
 import com.example.musicproject.utils.NavigationUtils
 import com.example.musicproject.viewmodel.auth.AuthActions
 import com.example.musicproject.viewmodel.auth.AuthState
 import com.example.musicproject.viewmodel.auth.AuthViewModel
-import com.example.musicproject.viewmodel.password.PasswordActions
+import com.example.musicproject.viewmodel.password.PasswordAction
 import com.example.musicproject.viewmodel.password.PasswordState
 import com.example.musicproject.viewmodel.password.PasswordViewModel
 
@@ -53,28 +51,70 @@ import com.example.musicproject.viewmodel.password.PasswordViewModel
 fun PasswordScreen(
     navController: NavController,
     authViewModel: AuthViewModel,
-    passwordViewModel: PasswordViewModel = hiltViewModel(),
+    passwordViewModel: PasswordViewModel,
 ) {
 
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
-    val uiState by passwordViewModel.state.collectAsStateWithLifecycle()
+    val passwordState by passwordViewModel.state.collectAsStateWithLifecycle()
 
-    // Handle navigation
-    HandleNavigation(
-        navController = navController,
-        uiState = uiState,
-        authState = authState
-    )
+    LaunchedEffect(passwordState) {
+        Log.e("Password Screen", "State : $passwordState")
+    }
 
     // Content of screen
     ScreenContent(
         authState = authState,
         authViewModel = authViewModel,
-        passwordState = uiState,
+        passwordState = passwordState,
         passwordViewModel = passwordViewModel,
     )
-    Log.e("PasswordScreen", "UiState: $uiState")
-    Log.e("PasswordScreen", "Password: ${authState.password}")
+
+    // Loading Dialog
+    HandleLoading(authState.isLoading)
+
+    // Trigger login if necessary
+    LaunchedEffect(passwordState.isTrigger) {
+        if (passwordState.isTrigger) {
+            if (authState.isLogin) {
+                authViewModel.onAction(AuthActions.OnShowLoading)
+                authViewModel.onAction(AuthActions.Login)
+            } else {
+                passwordViewModel.onAction(PasswordAction.OnNavigateTo)
+            }
+            passwordViewModel.onAction(PasswordAction.ResetTrigger)
+        }
+    }
+
+    LaunchedEffect(authState) {
+        when {
+            authState.isSuccess -> {
+                authViewModel.onAction(AuthActions.OnHideLoading)
+                passwordViewModel.onAction(PasswordAction.OnNavigateTo)
+            }
+
+            authState.isFailed -> {
+                authViewModel.onAction(AuthActions.OnHideLoading)
+                passwordViewModel.onAction(PasswordAction.ResetTrigger)
+            }
+        }
+    }
+
+    // Handle navigation
+    HandleNavigation(
+        navController = navController,
+        uiState = passwordState,
+        authState = authState,
+        passwordViewModel = passwordViewModel
+    )
+
+}
+
+@Composable
+private fun HandleLoading(authState: Boolean) {
+    // Show loading animation based on the loading state
+    if (authState) {
+        LoadingDialog()
+    }
 }
 
 @Composable
@@ -85,10 +125,10 @@ private fun ScreenContent(
     passwordViewModel: PasswordViewModel,
     horizontalPadding: Dp = 16.dp,
 ) {
+
     Column(
         Modifier
             .fillMaxSize()
-            .background(Color.Black)
             .systemBarsPadding()
             .imePadding(),
         verticalArrangement = Arrangement.SpaceAround
@@ -97,7 +137,7 @@ private fun ScreenContent(
         BackButton(
             onClick = remember {
                 {
-                    passwordViewModel.onAction(PasswordActions.OnBack)
+                    passwordViewModel.onAction(PasswordAction.OnBack)
                 }
             },
             modifier = Modifier.padding(start = horizontalPadding)
@@ -115,10 +155,9 @@ private fun ScreenContent(
             Password(
                 value = authState.password,
                 isShowingPassword = passwordState.isShowingPassword,
-                onTogglePasswordVisibility = { passwordViewModel.onAction(PasswordActions.IsShowingPassword) },
+                onTogglePasswordVisibility = { passwordViewModel.onAction(PasswordAction.IsShowingPassword) },
                 onValueChange = {
                     authViewModel.onAction(AuthActions.UpdatePassword(it))
-                    passwordViewModel.onAction(PasswordActions.IsEnableButton(it))
                 },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.DarkGray,
@@ -153,7 +192,7 @@ private fun ScreenContent(
         AppButton(
             onClick = remember {
                 {
-                    passwordViewModel.onAction(PasswordActions.OnNavigateTo)
+                    passwordViewModel.onAction(PasswordAction.IsTrigger)
                 }
             },
             title = "Tiếp tục",
@@ -163,7 +202,7 @@ private fun ScreenContent(
                 disabledContainerColor = Color.DarkGray,
                 disabledContentColor = DarkWhite
             ),
-            isEnable = passwordState.isEnableButton,
+            isEnable = authViewModel.enablePasswordButton(),
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(56.dp)
@@ -172,9 +211,11 @@ private fun ScreenContent(
     }
 }
 
+
 @Composable
 private fun HandleNavigation(
     navController: NavController,
+    passwordViewModel: PasswordViewModel,
     uiState: PasswordState,
     authState: AuthState,
 ) {
@@ -188,7 +229,8 @@ private fun HandleNavigation(
 
             uiState.isNavigate -> {
                 val target =
-                    if (authState.isLogin) Screen.MainScreen.route else Screen.NameScreen.route
+                    if (authState.isLogin) Screen.MainScreen.route else Screen.BirthDayScreen.route
+                passwordViewModel.onAction(PasswordAction.ResetTrigger)
                 NavigationUtils.navigateTo(navController, target)
             }
         }

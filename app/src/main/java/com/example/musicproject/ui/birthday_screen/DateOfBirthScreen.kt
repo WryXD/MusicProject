@@ -41,11 +41,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.musicproject.R
+import com.example.musicproject.navigation.Screen
 import com.example.musicproject.ui.custom_components.AppButton
 import com.example.musicproject.ui.custom_components.BackButton
 import com.example.musicproject.ui.custom_components.Title
@@ -55,9 +54,9 @@ import com.example.musicproject.utils.NavigationUtils
 import com.example.musicproject.viewmodel.auth.AuthActions
 import com.example.musicproject.viewmodel.auth.AuthState
 import com.example.musicproject.viewmodel.auth.AuthViewModel
-import com.example.musicproject.viewmodel.birthday.Actions
+import com.example.musicproject.viewmodel.birthday.DobActions
 import com.example.musicproject.viewmodel.birthday.DateOfBirthViewModel
-import com.example.musicproject.viewmodel.birthday.UiState
+import com.example.musicproject.viewmodel.birthday.DobState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -67,30 +66,34 @@ import java.util.Locale
 fun DateOfBirthScreen(
     navController: NavController,
     authViewModel: AuthViewModel,
-    dobViewModel: DateOfBirthViewModel = hiltViewModel(),
+    dobViewModel: DateOfBirthViewModel,
 ) {
 
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
     val uiState by dobViewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState) {
+        Log.e("DateOfBirthScreen", "UiState: $uiState")
+    }
+
     // Handle navigation
     HandleNavigation(
-        uiState = uiState,
+        dobState = uiState,
         navController = navController
     )
     // Content of screen
     ScreenContent(
         authState = authState,
-        uiState = uiState,
+        dobState = uiState,
         authViewModel = authViewModel,
         dobViewModel = dobViewModel,
     )
-    Log.e("DateOfBirthScreen", "UiState: $uiState")
 }
 
 @Composable
 private fun ScreenContent(
     authState: AuthState,
-    uiState: UiState,
+    dobState: DobState,
     authViewModel: AuthViewModel,
     dobViewModel: DateOfBirthViewModel,
     horizontalPadding: Dp = 16.dp,
@@ -99,9 +102,8 @@ private fun ScreenContent(
     Column(
         Modifier
             .fillMaxSize()
-            .imePadding()
             .systemBarsPadding()
-            .background(color = Color.Black),
+            .imePadding(),
         verticalArrangement = Arrangement.SpaceAround
     ) {
 
@@ -110,27 +112,26 @@ private fun ScreenContent(
             Modifier.padding(start = horizontalPadding),
             onClick = remember {
                 {
-                    dobViewModel.onAction(Actions.OnBack)
+                    dobViewModel.onAction(DobActions.OnBack)
                 }
             }
         )
 
         // Date picker handle
         DatePickerModalInput(
-            visible = uiState.isVisibleDatePicker,
+            visible = dobState.isVisibleDatePicker,
             onDateSelected = remember {
                 { date ->
                     date?.let {
                         val formater = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                         val result = formater.format(Date(it)).toString()
-                        authViewModel.onAction(AuthActions.UpdateBirthday(result))
-                        dobViewModel.onAction(Actions.OnEnableButton)
+                        authViewModel.onAction(AuthActions.UpdateBirthDay(result))
                     }
                 }
             },
             onDismiss = remember {
                 {
-                    dobViewModel.onAction(Actions.UpdateVisibleDatePicker)
+                    dobViewModel.onAction(DobActions.UpdateVisibleDatePicker)
                 }
             }
         )
@@ -149,7 +150,7 @@ private fun ScreenContent(
             FormatDayOfBirth(
                 onClick = remember {
                     {
-                        dobViewModel.onAction(Actions.UpdateVisibleDatePicker)
+                        dobViewModel.onAction(DobActions.UpdateVisibleDatePicker)
                     }
                 },
                 formatDay = authState.birthday ?: "dd/MM/yyyy",
@@ -160,12 +161,15 @@ private fun ScreenContent(
         Spacer(Modifier.height(16.dp))
 
         // Button to next screen
-        AppButton(
-            onClick = {
 
+        AppButton(
+            onClick = remember {
+                {
+                    dobViewModel.onAction(DobActions.OnNavigateTo)
+                }
             },
             title = "Tiếp tục",
-            isEnable = uiState.isEnableButton,
+            isEnable = authViewModel.enableBirthDayButton(),
             modifier = Modifier
                 .height(56.dp)
                 .fillMaxWidth()
@@ -181,12 +185,16 @@ private fun ScreenContent(
 }
 
 @Composable
-private fun HandleNavigation(uiState: UiState, navController: NavController) {
+private fun HandleNavigation(dobState: DobState, navController: NavController) {
 
-    LaunchedEffect(uiState) {
+    LaunchedEffect(dobState) {
         when {
-            uiState.isBack -> {
+            dobState.isBack -> {
                 NavigationUtils.navigateBack(navController)
+            }
+
+            dobState.isNavigate -> {
+                NavigationUtils.navigateTo(navController, Screen.GenderScreen.route)
             }
         }
     }

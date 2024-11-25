@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicproject.R
@@ -51,13 +52,14 @@ fun Email(
     value: String,
     onValueChange: (String) -> Unit,
     colors: TextFieldColors,
+    corner: Dp = 15.dp,
     placeholder: @Composable (() -> Unit)? = null,
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         colors = colors,
-        shape = RoundedCornerShape(15.dp),
+        shape = RoundedCornerShape(corner),
         placeholder = placeholder,
         maxLines = 1,
         keyboardOptions = KeyboardOptions(
@@ -86,9 +88,9 @@ fun Password(
         maxLines = 1,
         trailingIcon = {
             val icon = if (isShowingPassword) {
-                painterResource(id = R.drawable.visibility)
-            } else {
                 painterResource(id = R.drawable.visibility_off)
+            } else {
+                painterResource(id = R.drawable.visibility)
             }
             IconButton(
                 onClick = {
