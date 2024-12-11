@@ -6,4 +6,4 @@ import dagger.hilt.android.HiltAndroidApp
 
 @GlideModule
 @HiltAndroidApp
-class MyApp: Application()
+class MyApp : Application()

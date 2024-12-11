@@ -2,7 +2,9 @@ package com.example.musicproject.ui.password_screen
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,21 +13,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.Visibility
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.musicproject.R
@@ -69,6 +77,9 @@ fun PasswordScreen(
         passwordViewModel = passwordViewModel,
     )
 
+    // Failure Dialog
+    HandleLoadingFailure(authState.isFailed)
+
     // Loading Dialog
     HandleLoading(authState.isLoading)
 
@@ -110,6 +121,50 @@ fun PasswordScreen(
 }
 
 @Composable
+private fun HandleLoadingFailure(authState: Boolean) {
+    if (authState) {
+        FailureDialog()
+    }
+}
+
+@Composable
+fun FailureDialog(
+    modifier: Modifier = Modifier,
+    dialogWidth: Dp = 250.dp,
+    dialogHeight: Dp = 250.dp,
+    message: String = "Email hoặc mật khẩu không chính xác!",
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.White.copy(alpha = 0.5f))
+            .clickable(
+                enabled = false,
+                onClick = {}
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .size(width = dialogWidth, height = dialogHeight)
+                .align(Alignment.Center)
+        ) {
+            Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = message,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun HandleLoading(authState: Boolean) {
     // Show loading animation based on the loading state
     if (authState) {
@@ -129,6 +184,7 @@ private fun ScreenContent(
     Column(
         Modifier
             .fillMaxSize()
+            .background(Color.Black)
             .systemBarsPadding()
             .imePadding(),
         verticalArrangement = Arrangement.SpaceAround

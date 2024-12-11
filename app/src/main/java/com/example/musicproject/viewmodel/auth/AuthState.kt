@@ -22,4 +22,5 @@ data class AuthState(
     val isLoading: Boolean = false,
     val isSuccess: Boolean = false,
     val isFailed: Boolean = false,
+    val isVisibleFailureDialog: Boolean = false,
 )

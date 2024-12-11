@@ -218,7 +218,13 @@ class AuthViewModel @Inject constructor(
                     _authenticationState.update { it.copy(isLoggedIn = true) }
                 }
 
-                result.isFailure -> _authState.update { it.copy(isFailed = true) }
+                result.isFailure -> {
+                    _authState.update { it.copy(isVisibleFailureDialog = true) }
+                    _authState.update { it.copy(isFailed = true) }
+                    delay(1000)
+                    _authState.update { it.copy(isVisibleFailureDialog = false) }
+                    _authState.update { it.copy(isFailed = false) }
+                }
             }
         }
     }

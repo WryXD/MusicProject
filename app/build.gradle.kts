@@ -27,8 +27,7 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
         }
     }
@@ -65,7 +64,7 @@ dependencies {
 
     // Constrain Layout
 
-    implementation (libs.androidx.constraintlayout.compose)
+    implementation(libs.androidx.constraintlayout.compose)
     // Hilt implementation
     implementation(libs.hilt.android)
     implementation(libs.firebase.auth)
@@ -80,23 +79,23 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     // Mockito Kotlin
-    testImplementation (libs.mockito.kotlin)
-    androidTestImplementation( libs.mockito.kotlin)
-    androidTestImplementation (libs.mockito.android)
+    testImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.android)
 
     // Navigation Testing
-        androidTestImplementation (libs.androidx.navigation.testing.v283)
+    androidTestImplementation(libs.androidx.navigation.testing.v283)
     // retrofit
     implementation(libs.retrofit)
     //json converter
-    implementation (libs.converter.gson.v2110)
+    implementation(libs.converter.gson.v2110)
     // json parser
     implementation(libs.moshi)
     implementation(libs.moshi.kotlin)
     // image loader
-    implementation (libs.compose)
+    implementation(libs.compose)
     // system ui controller
-    implementation (libs.accompanist.systemuicontroller)
+    implementation(libs.accompanist.systemuicontroller)
     // media player
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.exoplayer.dash)

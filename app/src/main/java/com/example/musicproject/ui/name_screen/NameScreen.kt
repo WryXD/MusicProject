@@ -105,6 +105,7 @@ private fun NameScreenContent(
         Column(
             Modifier
                 .fillMaxSize()
+                .background(Color.Black)
                 .systemBarsPadding()
                 .imePadding(),
             verticalArrangement = Arrangement.SpaceAround

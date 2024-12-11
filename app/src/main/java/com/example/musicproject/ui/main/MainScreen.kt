@@ -81,12 +81,11 @@ fun MainScreen(
 
     // Music player
     MusicPlayer(
-        context = LocalContext.current,
-        playerState = playerState
+        context = LocalContext.current, playerState = playerState
     )
 
     val bottomNavItem by lazy {
-        listOf(
+        mutableListOf(
             BottomNavItems.Home, BottomNavItems.Search, BottomNavItems.Library
         )
     }
@@ -108,8 +107,7 @@ fun MainScreen(
 
         }
 
-        MusicPlayerContent(
-            playerState = playerState,
+        MusicPlayerContent(playerState = playerState,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
@@ -117,11 +115,9 @@ fun MainScreen(
                     bottom.linkTo(bottomNav.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                }
-        )
+                })
 
-        MainBottomNavigation(
-            items = bottomNavItem,
+        MainBottomNavigation(items = bottomNavItem,
             currentRoute = uiState.bottomNavId,
             onItemSelected = onNavigationItemSelected,
             modifier = Modifier
@@ -130,8 +126,7 @@ fun MainScreen(
                     bottom.linkTo(parent.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                }
-        )
+                })
 
     }
 
@@ -169,7 +164,7 @@ fun MainContent(
 
 @Composable
 private fun MainBottomNavigation(
-    items: List<BottomNavItems>,
+    items: MutableList<BottomNavItems>,
     currentRoute: Int,
     onItemSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -183,8 +178,7 @@ private fun MainBottomNavigation(
                 val isSelected = index == currentRoute
                 val color = if (isSelected) item.selectedIcon else item.unselectedIcon
 
-                NavigationBarItem(
-                    selected = isSelected,
+                NavigationBarItem(selected = isSelected,
                     onClick = { onItemSelected(index) },
                     icon = {
                         Icon(
@@ -224,8 +218,7 @@ fun MusicPlayerContent(
                     top.linkTo(parent.top, margin = 8.dp)
                     bottom.linkTo(parent.bottom, margin = 8.dp)
                     start.linkTo(parent.start, margin = 8.dp)
-                }
-        ) {
+                }) {
             GlideImage(
                 model = playerState.albumCoverUrl,
                 contentDescription = null,
@@ -233,8 +226,7 @@ fun MusicPlayerContent(
             )
         }
 
-        Text(
-            text = playerState.title,
+        Text(text = playerState.title,
             color = Color.White,
             fontSize = 14.sp,
             maxLines = 1,
@@ -242,10 +234,8 @@ fun MusicPlayerContent(
                 top.linkTo(imageRes.top)
                 start.linkTo(imageRes.end, margin = 8.dp)
 
-            }
-        )
-        Text(
-            text = playerState.artist,
+            })
+        Text(text = playerState.artist,
             color = Color(0xFFA69C9C),
             fontSize = 14.sp,
             maxLines = 1,
@@ -253,18 +243,14 @@ fun MusicPlayerContent(
                 top.linkTo(titleRes.bottom, margin = 4.dp)
                 start.linkTo(titleRes.start)
                 bottom.linkTo(imageRes.bottom, margin = 8.dp)
-            }
-        )
-        PlayIcon(
-            modifier = Modifier.constrainAs(playButton) {
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-                end.linkTo(parent.end, margin = 8.dp)
-            },
-            onClick = {
+            })
+        PlayIcon(modifier = Modifier.constrainAs(playButton) {
+            top.linkTo(parent.top)
+            bottom.linkTo(parent.bottom)
+            end.linkTo(parent.end, margin = 8.dp)
+        }, onClick = {
 
-            },
-            isPlaying = false
+        }, isPlaying = false
         )
     }
 }
@@ -288,8 +274,7 @@ fun PlayIcon(
     ) {
         Icon(
             painter = icon,
-            modifier = Modifier
-                .size(20.dp),
+            modifier = Modifier.size(20.dp),
             tint = Color.White,
             contentDescription = null
         )
@@ -309,7 +294,7 @@ fun MusicPlayer(context: Context, playerState: MusicPlayerState) {
     }
 
     LaunchedEffect(playerState.isPlaying) {
-        when(playerState.isPlaying) {
+        when (playerState.isPlaying) {
             true -> exoPlayer.play()
             false -> exoPlayer.pause()
         }
