@@ -37,10 +37,14 @@ import com.example.musicproject.ui.theme.DarkWhite
 import com.example.musicproject.ui.theme.RobotoFont
 
 @Composable
-fun Title(title: String, modifier: Modifier = Modifier) {
+fun Title(
+    title: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle = RobotoFont.bodyLarge,
+) {
     Text(
         text = title,
-        style = RobotoFont.bodyLarge,
+        style = style,
         modifier = modifier,
         color = Color.White
     )
@@ -73,7 +77,7 @@ fun Email(
 fun Password(
     modifier: Modifier = Modifier,
     value: String,
-    isShowingPassword: Boolean ,
+    isShowingPassword: Boolean,
     onTogglePasswordVisibility: () -> Unit,
     onValueChange: (String) -> Unit,
     colors: TextFieldColors,

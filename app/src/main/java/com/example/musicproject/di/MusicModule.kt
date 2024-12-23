@@ -1,7 +1,11 @@
 package com.example.musicproject.di
 
 import com.example.musicproject.repositories.music.MusicService
+import com.example.musicproject.repositories.music.remote.MusicRepository
+import com.example.musicproject.repositories.music.remote.MusicRepositoryImpl
 import com.example.musicproject.utils.Constants.BASE_URL
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,18 +21,24 @@ object MusicModule {
     @Singleton
     @Provides
     fun provideRetrofit(): Retrofit {
-        val retrofit by lazy {
-            Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-        }
-        return retrofit
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
     }
 
     @Singleton
     @Provides
     fun provideMusicApi(retrofit: Retrofit): MusicService {
         return retrofit.create(MusicService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideMusicRepository(
+        firebaseAuth: FirebaseAuth,
+        fireStore: FirebaseFirestore,
+    ): MusicRepository {
+        return MusicRepositoryImpl(firebaseAuth, fireStore)
     }
 }

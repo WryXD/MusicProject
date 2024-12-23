@@ -1,10 +1,8 @@
 [versions]
-accompanistPermissions = "0.36.0"
 accompanistSystemuicontroller = "0.28.0"
 agp = "8.6.0"
 compose = "1.0.0-beta01"
 constraintlayoutCompose = "1.1.0"
-converterGson = "2.11.0)"
 converterGsonVersion = "2.11.0"
 hiltAndroid = "2.50"
 hiltNavigationCompose = "1.2.0"
@@ -26,11 +24,13 @@ googleGmsGoogleServices = "4.4.2"
 firebaseAuth = "23.1.0"
 navigationTestingVersion = "2.8.4"
 retrofit = "2.11.0"
+roomKtx = "2.6.1"
+roomRuntime = "2.6.1"
 runtimeSavedInstanceState = "1.0.0-alpha11"
 firebaseFirestoreKtx = "25.1.1"
+roomCommon = "2.6.1"
 
 [libraries]
-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,8 +40,10 @@ androidx-media3-exoplayer-dash = { module = "androidx.media3:media3-exoplayer-da
 androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3Exoplayer" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-testing-v283 = { module = "androidx.navigation:navigation-testing", version.ref = "navigationTestingVersion" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 compose = { module = "com.github.bumptech.glide:compose", version.ref = "compose" }
-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 converter-gson-v2110 = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGsonVersion" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
@@ -66,6 +68,8 @@ firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-fires
 moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
 moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshiKotlin" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+room-ktx = { module = "anroidx.room:room-ktx", version.ref = "roomKtx" }
+androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

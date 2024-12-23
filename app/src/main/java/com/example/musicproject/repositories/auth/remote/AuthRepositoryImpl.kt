@@ -6,8 +6,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class AuthRepositoryImpl(
+class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val fireStore: FirebaseFirestore,
 ) : AuthRepository {
@@ -16,7 +17,8 @@ class AuthRepositoryImpl(
             // Sign in with email and password
             val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
             // Get the user from the result
-            val user = result.user?: return Result.failure(IllegalStateException("User login failed"))
+            val user =
+                result.user ?: return Result.failure(IllegalStateException("User login failed"))
             Result.success(user)
         } catch (e: Exception) {
             Result.failure(IllegalStateException(e))
@@ -68,6 +70,27 @@ class AuthRepositoryImpl(
             }
         } catch (e: Exception) {
             Log.e("Authentication", "Registration failed", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getUserProfile(): Result<UserProfile> {
+        return try {
+            val userId = firebaseAuth.currentUser?.uid!!
+            val documentSnapshot = fireStore.collection("users").document(userId).get().await()
+            val userProfile = UserProfile(
+                id = documentSnapshot.getString("id") ?: "",
+                name = documentSnapshot.getString("name") ?: "Unknown",
+                birthday = documentSnapshot.getString("birthday") ?: "N/A",
+                gender = documentSnapshot.getString("gender") ?: "N/A",
+                email = documentSnapshot.getString("email") ?: "N/A",
+            )
+            Log.e("Authentication", "Get User Profile Success!: $userProfile")
+            Result.success(userProfile)
+        } catch (
+            e: Exception,
+        ) {
+            Log.e("Authentication", "Failed to get user profile: ${e.message}", e)
             Result.failure(e)
         }
     }

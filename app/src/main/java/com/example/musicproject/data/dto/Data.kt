@@ -16,5 +16,5 @@ data class Data(
     val md5_image: String,
     val artist: Artist,
     val album: Album,
-    val type: String
+    val type: String,
 )

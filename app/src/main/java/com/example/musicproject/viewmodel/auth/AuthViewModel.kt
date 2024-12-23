@@ -254,6 +254,7 @@ class AuthViewModel @Inject constructor(
     private fun logout() {
         viewModelScope.launch(Dispatchers.IO) {
             repository.logout()
+            _authenticationState.update { it.copy(isLoggedIn = false) }
         }
     }
 

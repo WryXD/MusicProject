@@ -1,9 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.gms.google.services)
+
     id("com.google.dagger.hilt.android")
     id("kotlin-kapt")
-    alias(libs.plugins.google.gms.google.services)
+  
 }
 
 android {
@@ -63,13 +65,14 @@ dependencies {
     implementation(libs.androidx.material3)
 
     // Constrain Layout
-
     implementation(libs.androidx.constraintlayout.compose)
     // Hilt implementation
     implementation(libs.hilt.android)
     implementation(libs.firebase.auth)
     implementation(libs.androidx.runtime.saved.instance.state)
     implementation(libs.firebase.firestore.ktx)
+
+
     kapt(libs.hilt.android.compiler)
 
     // For Jetpack Compose integration:

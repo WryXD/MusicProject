@@ -12,15 +12,18 @@ import com.example.musicproject.ui.auth_screen.AuthScreen
 import com.example.musicproject.ui.birthday_screen.DateOfBirthScreen
 import com.example.musicproject.ui.boarding_screen.BoardingScreen
 import com.example.musicproject.ui.gender.GenderScreen
-import com.example.musicproject.ui.main.HomeScreen
 import com.example.musicproject.ui.main.MainScreen
-import com.example.musicproject.viewmodel.main.MainViewModel
+import com.example.musicproject.ui.main.home_screen.HomeScreen
 import com.example.musicproject.ui.name_screen.NameScreen
 import com.example.musicproject.ui.password_screen.PasswordScreen
 import com.example.musicproject.utils.AnimationUtils
 import com.example.musicproject.viewmodel.auth.AuthViewModel
 import com.example.musicproject.viewmodel.birthday.DateOfBirthViewModel
 import com.example.musicproject.viewmodel.gender.GenderViewModel
+import com.example.musicproject.viewmodel.main.MainViewModel
+import com.example.musicproject.viewmodel.main.home.HomeViewModel
+import com.example.musicproject.viewmodel.main.library.LibraryViewModel
+import com.example.musicproject.viewmodel.main.search.SearchViewModel
 import com.example.musicproject.viewmodel.name.NameViewModel
 import com.example.musicproject.viewmodel.password.PasswordViewModel
 
@@ -35,6 +38,9 @@ fun AppNavigation(
     dobViewModel: DateOfBirthViewModel = hiltViewModel(),
     genderViewModel: GenderViewModel = hiltViewModel(),
     mainViewModel: MainViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel = hiltViewModel(),
+    homeViewModel: HomeViewModel = hiltViewModel(),
+    libraryViewModel: LibraryViewModel = hiltViewModel(),
 ) {
     NavHost(
         navController = navController,
@@ -98,9 +104,13 @@ fun AppNavigation(
             popExitTransition = AnimationUtils.slideOutOfLeft(),
         ) {
             MainScreen(
-                authViewModel = authViewModel,
                 navController = navController,
-                mainViewModel = mainViewModel
+                authViewModel = authViewModel,
+                mainViewModel = mainViewModel,
+                homeViewModel = homeViewModel,
+                searchViewModel = searchViewModel,
+                passwordViewModel = passwordViewModel,
+                libraryViewModel = libraryViewModel
             )
         }
 
@@ -119,7 +129,11 @@ fun AppNavigation(
         composable(
             route = Screen.HomeScreen.route,
         ) {
-           HomeScreen(mainViewModel = mainViewModel)
+            HomeScreen(
+                mainViewModel = mainViewModel,
+                homeViewModel = homeViewModel,
+                libraryViewModel = libraryViewModel
+            )
         }
     }
 }

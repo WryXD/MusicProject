@@ -1,5 +1,6 @@
 package com.example.musicproject.repositories.auth.remote
 
+import com.example.musicproject.domain.model.user.UserProfile
 import com.google.firebase.auth.FirebaseUser
 
 interface AuthRepository {
@@ -14,4 +15,6 @@ interface AuthRepository {
     suspend fun logout()
 
     suspend fun checkCurrentUser(): Result<FirebaseUser>
+
+    suspend fun getUserProfile(): Result<UserProfile>
 }
