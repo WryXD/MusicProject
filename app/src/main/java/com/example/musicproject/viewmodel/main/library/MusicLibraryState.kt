@@ -20,4 +20,5 @@ data class MusicLibraryState(
     val artist: String = "",
     val title: String = "",
     val isReleaseExoplayer: Boolean = false,
+    val isShowingLikedPlaylist: Boolean = false,
 )

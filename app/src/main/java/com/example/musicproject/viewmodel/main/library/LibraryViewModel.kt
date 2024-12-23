@@ -36,12 +36,6 @@ class LibraryViewModel @Inject constructor(
 
     private var exoPlayer: ExoPlayer? = null
 
-    init {
-        initializeExoPlayer()
-        listenToLikedSongsUpdates()
-        listenToPlaylistUpdates()
-    }
-
     private fun initializeExoPlayer() {
         releaseExoPlayer()
         exoPlayer = ExoPlayer.Builder(getApplication(context)).build()
@@ -58,6 +52,8 @@ class LibraryViewModel @Inject constructor(
         when (action) {
             is Actions.OnShowCreatePlaylistDialog -> showCreatePlaylistDialog()
 
+            is Actions.OnShowLikedSongPlaylist -> showLikedSongPlaylist(action.isShow)
+
             is Actions.OnHideCreatePlaylistDialog -> hideCreatePlaylistDialog()
 
             is Actions.UpdatePlaylistName -> updatePlaylistName(action.name)
@@ -73,7 +69,15 @@ class LibraryViewModel @Inject constructor(
             is Actions.InitializeExoPlayer -> initializeExoPlayer()
 
             is Actions.UpdateVisibleMusicPlayer -> updateVisibleMusicPlayer(action.isVisible)
+
+            is Actions.ListenToLikedSongUpdate -> listenToLikedSongsUpdates()
+
+            is Actions.ListenToPlaylistUpdate -> listenToPlaylistUpdates()
         }
+    }
+
+    private fun showLikedSongPlaylist(isShowing: Boolean) {
+       _libraryState.update { it.copy(isShowingLikedPlaylist = isShowing) }
     }
 
     private fun updateVisibleMusicPlayer(isVisible: Boolean) {

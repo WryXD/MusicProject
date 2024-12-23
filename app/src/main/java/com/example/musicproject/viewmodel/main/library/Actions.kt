@@ -6,7 +6,10 @@ interface Actions {
     data object PauseMusic: Actions
     data object ReleaseExoPlayer: Actions
     data object InitializeExoPlayer: Actions
+    data object ListenToLikedSongUpdate : Actions
+    data object ListenToPlaylistUpdate : Actions
 
+    data class OnShowLikedSongPlaylist(val isShow: Boolean): Actions
     data class UpdatePlaylistName(val name: String) : Actions
     data class OnCreatePlaylist(val playlistName: String, val song: List<String>) : Actions
     data class PlayPlaylistTrack(val index: Int): Actions

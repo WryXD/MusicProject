@@ -18,8 +18,10 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(UserProfile())
     val uiState = _uiState.asStateFlow()
 
-    init {
-        fetchUserProfile()
+    fun onAction(action: HomeAction) {
+        when (action) {
+            is HomeAction.OnFetchUserProfile -> fetchUserProfile()
+        }
     }
 
     private fun fetchUserProfile() {

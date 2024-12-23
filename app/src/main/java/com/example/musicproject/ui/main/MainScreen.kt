@@ -75,6 +75,7 @@ import com.example.musicproject.viewmodel.auth.AuthViewModel
 import com.example.musicproject.viewmodel.main.MainScreenAction
 import com.example.musicproject.viewmodel.main.MainViewModel
 import com.example.musicproject.viewmodel.main.MusicPlayerState
+import com.example.musicproject.viewmodel.main.home.HomeAction
 import com.example.musicproject.viewmodel.main.home.HomeViewModel
 import com.example.musicproject.viewmodel.main.library.Actions
 import com.example.musicproject.viewmodel.main.library.LibraryViewModel
@@ -108,6 +109,10 @@ fun MainScreen(
         when (authenticationState.isLoggedIn) {
             true -> {
                 Log.e("Main Screen", "User is login in!")
+                homeViewModel.onAction(HomeAction.OnFetchUserProfile)
+                libraryViewModel.onAction(Actions.InitializeExoPlayer)
+                libraryViewModel.onAction(Actions.ListenToLikedSongUpdate)
+                libraryViewModel.onAction(Actions.ListenToPlaylistUpdate)
             }
 
             false -> NavigationUtils.navigateTo(navController, Screen.BoardingScreen.route)

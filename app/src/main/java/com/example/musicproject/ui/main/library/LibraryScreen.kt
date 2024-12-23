@@ -70,10 +70,6 @@ fun LibraryScreen(
     val createPlaylistState by libraryViewModel.createPlaylistState.collectAsStateWithLifecycle()
     val playlistLibrary by libraryViewModel.library.collectAsStateWithLifecycle()
 
-    val isShowLikedScreen = remember {
-        mutableStateOf(false)
-    }
-
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
             Modifier
@@ -154,7 +150,7 @@ fun LibraryScreen(
             item {
                 Spacer(Modifier.height(16.dp))
                 LikedSongLayout(boxSize = 54.dp) {
-                   isShowLikedScreen.value = true
+                   libraryViewModel.onAction(Actions.OnShowLikedSongPlaylist(true))
                 }
             }
 
@@ -200,7 +196,7 @@ fun LibraryScreen(
             )
         }
 
-        if (isShowLikedScreen.value){
+        if (playlistLibrary.isShowingLikedPlaylist){
             LikedSongScreen(
                 libraryViewModel = libraryViewModel,
                 mainViewModel = mainViewModel

@@ -62,6 +62,7 @@ fun LikedSongScreen(
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
 
+
     val screenWidth = with(density) { configuration.screenWidthDp.dp.toPx() }
 
     val gradient = Brush.linearGradient(
@@ -102,10 +103,13 @@ fun LikedSongScreen(
                         .fillMaxSize()
                         .background(gradient)
                 ) {
-                    IconButton(
-                        onClick = {
-
+                    val onClickBack = remember{
+                        {
+                            libraryViewModel.onAction(Actions.OnShowLikedSongPlaylist(false))
                         }
+                    }
+                    IconButton(
+                        onClick = onClickBack
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.icon_back),
