@@ -73,11 +73,13 @@ class LibraryViewModel @Inject constructor(
             is Actions.ListenToLikedSongUpdate -> listenToLikedSongsUpdates()
 
             is Actions.ListenToPlaylistUpdate -> listenToPlaylistUpdates()
+
+            is Actions.DeletedPlaylist -> deletedPlaylist(action.id)
         }
     }
 
     private fun showLikedSongPlaylist(isShowing: Boolean) {
-       _libraryState.update { it.copy(isShowingLikedPlaylist = isShowing) }
+        _libraryState.update { it.copy(isShowingLikedPlaylist = isShowing) }
     }
 
     private fun updateVisibleMusicPlayer(isVisible: Boolean) {
@@ -118,7 +120,21 @@ class LibraryViewModel @Inject constructor(
                 result.onSuccess { playlist ->
                     Log.d("PlaylistUpdated", "Playlist updated: $playlist")
                     _libraryState.update { it.copy(playList = playlist) }
-                }.onFailure { error ->
+                }
+                result.onFailure { error ->
+                    _libraryState.update { it.copy(error = error.message) }
+                }
+            }
+        }
+    }
+
+    private fun deletedPlaylist(id: String) {
+        viewModelScope.launch {
+            musicRepository.deletedPlayList(id).collect { result ->
+                result.onSuccess {
+                    Log.d("PlaylistDeleted", "Playlist deleted: $id")
+                }
+                result.onFailure { error ->
                     _libraryState.update { it.copy(error = error.message) }
                 }
             }
@@ -152,8 +168,8 @@ class LibraryViewModel @Inject constructor(
 
             _libraryState.update { it.copy(currentIndex = index, isVisible = true) }
             currentExoPlayer.stop()
-            _libraryState.update { it.copy(isPlaying = false, previewDuration = null)}
-                val currentPlayer = _libraryState.value.currentPlayer
+            _libraryState.update { it.copy(isPlaying = false, previewDuration = null) }
+            val currentPlayer = _libraryState.value.currentPlayer
 
             currentPlayer?.let { exoPlayer ->
                 if (exoPlayer.isPlaying) {

@@ -1,9 +1,10 @@
 package com.example.musicproject.ui.main.library
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,12 +38,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -150,19 +153,21 @@ fun LibraryScreen(
             item {
                 Spacer(Modifier.height(16.dp))
                 LikedSongLayout(boxSize = 54.dp) {
-                   libraryViewModel.onAction(Actions.OnShowLikedSongPlaylist(true))
+                    libraryViewModel.onAction(Actions.OnShowLikedSongPlaylist(true))
                 }
             }
 
             items(playlistLibrary.playList.size) { index ->
                 Spacer(Modifier.height(16.dp))
                 val playListName by lazy { playlistLibrary.playList[index].playListName }
+                val playListId by lazy { playlistLibrary.playList[index].playListId }
                 PlayListLayout(
                     playList = playListName,
-                    onClick = {
-                       Log.e("PlayList", "PlayList clicked, $index")
-                    },
-                    boxSize = 54.dp
+                    onClick = {},
+                    boxSize = 54.dp,
+                    onDeleteClick = {
+                        libraryViewModel.onAction(Actions.DeletedPlaylist(playListId))
+                    }
                 )
             }
 
@@ -196,7 +201,7 @@ fun LibraryScreen(
             )
         }
 
-        if (playlistLibrary.isShowingLikedPlaylist){
+        if (playlistLibrary.isShowingLikedPlaylist) {
             LikedSongScreen(
                 libraryViewModel = libraryViewModel,
                 mainViewModel = mainViewModel
@@ -406,17 +411,36 @@ fun PlayListLayout(
     boxSize: Dp = 20.dp,
     fontSize: TextUnit = 16.sp,
     tint: Color = Color.White,
+    onDeleteClick: () -> Unit,
 ) {
+
+    var isShowDelete by remember {
+        mutableStateOf(false)
+    }
+
     Row(
         Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .clickable {
-                onClick()
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        onClick()
+                    },
+                    onLongPress = {
+                        isShowDelete = true
+                    }
+                )
+            }
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(
+                    onHorizontalDrag = { _, _ ->
+                        isShowDelete = false
+                    }
+                )
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-
         Box(
             modifier
                 .wrapContentSize()
@@ -439,6 +463,23 @@ fun PlayListLayout(
             color = Color.Green,
             fontSize = fontSize
         )
+
+        if (isShowDelete) {
+            Box(
+                Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.TopEnd
+            ) {
+                IconButton(
+                    onClick = onDeleteClick
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.icon_delete),
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                }
+            }
+        }
     }
 
 }

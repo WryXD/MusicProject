@@ -1,6 +1,5 @@
 package com.example.musicproject.repositories.music.remote
 
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 
 interface MusicRepository {
@@ -21,6 +20,5 @@ interface MusicRepository {
 
     suspend fun getPlayListStream(): Flow<Result<List<PlayList>>>
     suspend fun getPlayList(): Result<List<PlayList>>
-
-
+    suspend fun deletedPlayList(id: String): Flow<Result<Unit>>
 }

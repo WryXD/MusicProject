@@ -14,4 +14,5 @@ interface Actions {
     data class OnCreatePlaylist(val playlistName: String, val song: List<String>) : Actions
     data class PlayPlaylistTrack(val index: Int): Actions
     data class UpdateVisibleMusicPlayer(val isVisible: Boolean): Actions
+    data class DeletedPlaylist(val id: String): Actions
 }

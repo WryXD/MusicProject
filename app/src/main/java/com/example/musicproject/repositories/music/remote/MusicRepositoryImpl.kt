@@ -7,6 +7,7 @@ import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -105,17 +106,22 @@ class MusicRepositoryImpl @Inject constructor(
             val userId =
                 firebaseAuth.currentUser?.uid ?: throw IllegalStateException("User not logged in")
 
-            val playList = mapOf(
-                "playListName" to playListName,
-                "song" to song,
-            )
-
-            fireStore
+            val documentRef = fireStore
                 .collection("users")
                 .document(userId)
                 .collection("playList")
-                .add(playList)
-                .await()
+                .document()
+
+            val playListId = documentRef.id
+
+            val playList = mapOf(
+                "playListName" to playListName,
+                "song" to song,
+                "playListId" to playListId
+            )
+
+            documentRef.set(playList).await()
+
             Log.e("AddPlayList", "PlayList added successfully")
             Result.success(Unit)
         } catch (e: Exception) {
@@ -149,6 +155,26 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deletedPlayList(id: String): Flow<Result<Unit>> = flow {
+        try {
+            val userId = firebaseAuth.currentUser?.uid
+                ?: throw IllegalStateException("User not logged in")
+
+            // Thực hiện xóa tài liệu với ID được cung cấp
+            fireStore
+                .collection("users")
+                .document(userId)
+                .collection("playList")
+                .document(id)
+                .delete()
+                .await()
+            Log.d("DeletePlayList", "PlayList with ID $id deleted successfully")
+            emit(Result.success(Unit))
+        } catch (e: Exception) {
+            Log.e("DeletePlayList", "Failed to delete playList: ${e.message}")
+            emit(Result.failure(e))
+        }
+    }
 
     override suspend fun getPlayListStream(): Flow<Result<List<PlayList>>> = callbackFlow {
         val userId =

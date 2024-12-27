@@ -254,13 +254,10 @@ fun MainScreen(
             }
             if (isShow.value) {
                 ShowMusicAndComment(
-                    mainViewModel = mainViewModel,
                     onDismiss = {
                         isShow.value = false
                     },
-                    id = 0,
                     artist = playerState.artist,
-                    model = "",
                     title = playerState.title,
                     playerState = playerState
                 )
@@ -285,13 +282,10 @@ fun MainScreen(
 
             if (isShowLibrary.value) {
                 ShowMusicAndCommentLibrary(
-                    libraryViewModel = libraryViewModel,
                     onDismiss = {
                         isShowLibrary.value = false
                     },
-                    id = 0,
                     artist = library.artist,
-                    model = "",
                     title = library.title,
                     playerState = library
                 )
@@ -751,12 +745,9 @@ fun MusicProgressBar(
 fun ShowMusicAndComment(
     scaffoldState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     onDismiss: () -> Unit = {},
-    id: Long,
-    model: String,
     title: String,
     artist: String,
     playerState: MusicPlayerState,
-    mainViewModel: MainViewModel,
 ) {
     ModalBottomSheet(
         onDismissRequest = {
@@ -766,9 +757,6 @@ fun ShowMusicAndComment(
         sheetState = scaffoldState,
         content = {
             ShowMusicAndCommentLayout(
-                mainViewModel,
-                id = id,
-                model = model,
                 title = title,
                 artist = artist,
                 playerState = playerState
@@ -781,10 +769,7 @@ fun ShowMusicAndComment(
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun ShowMusicAndCommentLayout(
-    mainViewModel: MainViewModel,
     playerState: MusicPlayerState,
-    id: Long,
-    model: String,
     title: String,
     artist: String,
 ) {
@@ -885,12 +870,9 @@ fun ShowMusicAndCommentLayout(
 fun ShowMusicAndCommentLibrary(
     scaffoldState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     onDismiss: () -> Unit = {},
-    id: Long,
-    model: String,
     title: String,
     artist: String,
     playerState: MusicLibraryState,
-    libraryViewModel: LibraryViewModel,
 ) {
     ModalBottomSheet(
         onDismissRequest = {
@@ -900,9 +882,6 @@ fun ShowMusicAndCommentLibrary(
         sheetState = scaffoldState,
         content = {
             ShowMusicAndCommentLibraryLayout(
-                libraryViewModel,
-                id = id,
-                model = model,
                 title = title,
                 artist = artist,
                 playerState = playerState
@@ -915,10 +894,7 @@ fun ShowMusicAndCommentLibrary(
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun ShowMusicAndCommentLibraryLayout(
-    libraryViewModel: LibraryViewModel,
     playerState: MusicLibraryState,
-    id: Long,
-    model: String,
     title: String,
     artist: String,
 ) {
