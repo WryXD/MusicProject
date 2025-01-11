@@ -157,7 +157,12 @@ fun LibraryScreen(
                 }
             }
 
-            items(playlistLibrary.playList.size) { index ->
+            items(
+                playlistLibrary.playList.size,
+                key = { index ->
+                    playlistLibrary.playList[index].playListId
+                }
+            ) { index ->
                 Spacer(Modifier.height(16.dp))
                 val playListName by lazy { playlistLibrary.playList[index].playListName }
                 val playListId by lazy { playlistLibrary.playList[index].playListId }

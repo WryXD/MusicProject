@@ -32,6 +32,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,8 +55,8 @@ import com.example.musicproject.utils.NavigationUtils
 import com.example.musicproject.viewmodel.auth.AuthActions
 import com.example.musicproject.viewmodel.auth.AuthState
 import com.example.musicproject.viewmodel.auth.AuthViewModel
-import com.example.musicproject.viewmodel.birthday.DobActions
 import com.example.musicproject.viewmodel.birthday.DateOfBirthViewModel
+import com.example.musicproject.viewmodel.birthday.DobActions
 import com.example.musicproject.viewmodel.birthday.DobState
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -162,7 +163,9 @@ private fun ScreenContent(
         Spacer(Modifier.height(16.dp))
 
         // Button to next screen
-
+        val isEnable by remember {
+            mutableStateOf(authViewModel.enableBirthDayButton())
+        }
         AppButton(
             onClick = remember {
                 {
@@ -170,7 +173,7 @@ private fun ScreenContent(
                 }
             },
             title = "Tiếp tục",
-            isEnable = authViewModel.enableBirthDayButton(),
+            isEnable = isEnable,
             modifier = Modifier
                 .height(56.dp)
                 .fillMaxWidth()

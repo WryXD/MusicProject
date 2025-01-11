@@ -37,21 +37,29 @@ class AuthRepositoryImpl @Inject constructor(
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             val user =
                 result.user ?: return Result.failure(IllegalStateException("User creation failed"))
+            val emailVerified = user.isEmailVerified
+            if (!emailVerified) {
+                user.sendEmailVerification().await()
+                Log.e("Authentication", "Email verification sent")
+            }
+
+            // Create user profile in Firestore
+            val userProfile = UserProfile(
+                id = user.uid,
+                name = name,
+                birthday = birthday,
+                gender = gender,
+                email = email
+            )
 
             try {
-                // Create user profile in Firestore
-                val userProfile = UserProfile(
-                    id = user.uid,
-                    name = name,
-                    birthday = birthday,
-                    gender = gender,
-                    email = email
-                )
-                // Save user profile to Firestore
-                fireStore.collection("users").document(user.uid)
-                    .set(userProfile)
-                    .await()
 
+                if(user.isEmailVerified){
+                    // Save user profile to Firestore
+                    fireStore.collection("users").document(user.uid)
+                        .set(userProfile)
+                        .await()
+                }
                 Log.e("Firestore", "User profile created successfully")
                 Result.success(user)
 

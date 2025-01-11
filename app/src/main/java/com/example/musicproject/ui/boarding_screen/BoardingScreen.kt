@@ -1,6 +1,5 @@
 package com.example.musicproject.ui.boarding_screen
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,8 +19,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,30 +48,25 @@ import kotlinx.coroutines.delay
 fun BoardingScreen(
     navController: NavController,
     viewModel: BoardingViewModel = hiltViewModel(),
-    authViewModel: AuthViewModel,
+    authViewModel: AuthViewModel = hiltViewModel(),
 ) {
 
     // Collect UI state of boarding screen
     val uiState by viewModel.state.collectAsStateWithLifecycle()
-
-    LaunchedEffect(uiState) {
-        Log.e("Boarding Screen", "State : $uiState")
-    }
-
     // Data for boarding screen
-    val pages = listOf(
+    val pages = mutableListOf(
         BoardingData.First, BoardingData.Second, BoardingData.Third
     )
-
     // Calculate pager size
-    val pagerSize = pages.size
-
+    val pagerSize by remember { mutableIntStateOf(pages.size) }
     // Create pager state
     val state = rememberPagerState(pageCount = { pagerSize })
-
     // Auto slide effect
-    AutoSlideEffect(isEnable = uiState.isSliding, state, pages)
-
+    AutoSlideEffect(
+        isEnable = { uiState.isSliding },
+        state = { state },
+        pages = pages
+    )
 
     // Handle Navigation
     HandleNavigation(
@@ -81,7 +76,7 @@ fun BoardingScreen(
 
     // BoardingContent
     BoardingContent(
-        state = state,
+        state = { state },
         pages = pages,
         viewModel = viewModel,
         authViewModel = authViewModel
@@ -90,11 +85,11 @@ fun BoardingScreen(
 
 @Composable
 private fun BoardingContent(
-    state: PagerState,
-    pages: List<BoardingData>,
+    state: () -> PagerState,
+    pages: MutableList<BoardingData>,
     viewModel: BoardingViewModel,
     authViewModel: AuthViewModel,
-    horizontalPadding: Dp = 16.dp
+    horizontalPadding: Dp = 16.dp,
 ) {
     Column(
         Modifier
@@ -104,15 +99,14 @@ private fun BoardingContent(
             .background(Color.White),
         verticalArrangement = Arrangement.SpaceAround
     ) {
-        HorizontalPager(
-            state = state,
+        HorizontalPager(state = state(),
             beyondViewportPageCount = 1,
-            userScrollEnabled = false,
+            userScrollEnabled = true,
             key = { id ->
                 pages[id].image
-            }
-        ) { index ->
-            BoardingPage(pages = pages[index])
+            }) { index ->
+            val position by remember { derivedStateOf { pages[index] } }
+            BoardingPage(pages = position)
         }
 
         Spacer(Modifier.height(16.dp))
@@ -132,17 +126,19 @@ private fun BoardingContent(
             Spacer(Modifier.height(32.dp))
 
             // Button navigation to sign up screen
+            val onClickSignUp: () -> Unit = remember {
+                {
+                    authViewModel.onAction(AuthActions.UpdateIsSignUp)
+                    viewModel.onAction(BoardingActions.OnNavigateTo)
+                }
+            }
             AppButton(
-                onClick = remember {
-                    {
-                        authViewModel.onAction(AuthActions.UpdateIsSignUp)
-                        viewModel.onAction(BoardingActions.OnNavigateTo)
-                    }
-                },
+                onClick = onClickSignUp,
                 title = "Tạo một tài khoản",
                 colors = ButtonDefaults.buttonColors(
                     containerColor = BlueLight, contentColor = Color.White
                 ),
+                isEnable = true,
                 modifier = Modifier
                     .padding(horizontal = horizontalPadding)
                     .align(Alignment.CenterHorizontally)
@@ -152,17 +148,19 @@ private fun BoardingContent(
             Spacer(Modifier.height(16.dp))
 
             // Button to login screen
+            val onClickSignIn: () -> Unit = remember {
+                {
+                    authViewModel.onAction(AuthActions.UpdateIsLogin)
+                    viewModel.onAction(BoardingActions.OnNavigateTo)
+                }
+            }
             AppButton(
-                onClick = remember {
-                    {
-                        authViewModel.onAction(AuthActions.UpdateIsLogin)
-                        viewModel.onAction(BoardingActions.OnNavigateTo)
-                    }
-                },
+                onClick = onClickSignIn,
                 title = "Đăng nhập",
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White, contentColor = Color.DarkGray
                 ),
+                isEnable = true,
                 modifier = Modifier
                     .padding(horizontal = horizontalPadding)
                     .align(Alignment.CenterHorizontally)
@@ -188,13 +186,16 @@ private fun HandleNavigation(
 }
 
 @Composable
-private fun AutoSlideEffect(isEnable: Boolean, state: PagerState, pages: List<BoardingData>) {
-
-    LaunchedEffect(isEnable) {
+private fun AutoSlideEffect(
+    isEnable: () -> Boolean,
+    state: () -> PagerState,
+    pages: MutableList<BoardingData>,
+) {
+    LaunchedEffect(key1 = { isEnable() }) {
         while (true) {
-            val nextPage = (state.currentPage + 1) % pages.size
+            val nextPage = { (state().currentPage + 1) % pages.size }
             delay(2500)
-            state.scrollToPage(nextPage)
+            state().scrollToPage(nextPage())
         }
     }
 }

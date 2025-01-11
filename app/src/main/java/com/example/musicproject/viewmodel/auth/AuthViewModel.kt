@@ -96,6 +96,7 @@ class AuthViewModel @Inject constructor(
             is AuthActions.OnShowLoading -> showLoadingAnimation()
 
             is AuthActions.OnHideLoading -> hideLoadingAnimation()
+
         }
     }
 

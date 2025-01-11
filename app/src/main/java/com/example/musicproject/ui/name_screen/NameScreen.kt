@@ -58,7 +58,7 @@ fun NameScreen(
     val uiState by nameViewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(uiState) {
-         Log.e("Name Screen", "State : $uiState")
+        Log.e("Name Screen", "State : $uiState")
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -87,6 +87,7 @@ fun NameScreen(
                 nameViewModel.onAction(NameAction.OnNavigateTo)
                 authViewModel.onAction(AuthActions.OnHideLoading)
             }
+
             authState.isFailed -> {
                 authViewModel.onAction(AuthActions.OnHideLoading)
             }
@@ -180,6 +181,10 @@ private fun NameScreenContent(
             Spacer(Modifier.height(16.dp))
 
             // Button to next screen
+            val isEnable by remember {
+                androidx.compose.runtime.mutableStateOf(authViewModel.enableNameButton())
+            }
+
             AppButton(
                 onClick = remember {
                     {
@@ -188,7 +193,7 @@ private fun NameScreenContent(
                     }
                 },
                 title = "Tạo tài khoản",
-                isEnable = authViewModel.enableNameButton(),
+                isEnable = isEnable,
                 modifier = Modifier
                     .height(56.dp)
                     .fillMaxWidth()
@@ -208,7 +213,7 @@ private fun NameScreenContent(
 fun LoadingDialog(
     modifier: Modifier = Modifier,
     dialogWidth: Dp = 150.dp,
-    dialogHeight: Dp = 100.dp
+    dialogHeight: Dp = 100.dp,
 ) {
     Box(
         modifier = modifier

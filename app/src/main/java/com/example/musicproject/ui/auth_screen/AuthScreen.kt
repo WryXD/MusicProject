@@ -20,7 +20,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,19 +59,19 @@ fun AuthScreen(
     // ui state
     val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(authState) {
+    SideEffect {
         Log.e("AuthScreen", "AuthState : $authState")
     }
 
     // Handle navigation
     HandleNavigation(
-        uiState = uiState, navController = navController, authViewModel = authViewModel
+        uiState = { uiState }, navController = navController, authViewModel = authViewModel
     )
 
 
     // Content of screen
     ScreenContent(
-        authState = authState,
+        authState = { authState },
         authViewModel = authViewModel,
     )
 
@@ -77,7 +79,7 @@ fun AuthScreen(
 
 @Composable
 private fun ScreenContent(
-    authState: AuthState,
+    authState: () -> AuthState,
     authViewModel: AuthViewModel,
     horizontalPadding: Dp = 16.dp,
 ) {
@@ -90,13 +92,15 @@ private fun ScreenContent(
         verticalArrangement = Arrangement.SpaceAround
     ) {
 
+        // Handle back button
+        val onClickBack: () -> Unit = remember {
+            {
+                authViewModel.onAction(AuthActions.OnBack)
+            }
+        }
         BackButton(
-            onClick = remember {
-                {
-                    authViewModel.onAction(AuthActions.OnBack)
-                }
-            }, modifier = Modifier.padding(start = horizontalPadding)
-
+            onClick = onClickBack,
+            modifier = Modifier.padding(start = horizontalPadding)
         )
 
         // Input email field
@@ -108,12 +112,16 @@ private fun ScreenContent(
             )
 
             Spacer(Modifier.height(16.dp))
+            // Handle input email
+            val onValueChange: (String) -> Unit = remember {
+                { email ->
+                    authViewModel.onAction(AuthActions.UpdateEmail(email))
+                }
+            }
 
             Email(
-                value = authState.email,
-                onValueChange = {
-                    authViewModel.onAction(AuthActions.UpdateEmail(it))
-                },
+                value = authState().email,
+                onValueChange = onValueChange,
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.DarkGray,
                     unfocusedContainerColor = Color.DarkGray,
@@ -142,15 +150,21 @@ private fun ScreenContent(
             )
 
             Spacer(Modifier.height(16.dp))
+            // Handle button
+            val onNavigateTo: () -> Unit = remember {
+                {
+                    authViewModel.onAction(AuthActions.OnNavigateTo)
+                }
+            }
+
+            val isEnable by remember {
+                mutableStateOf(authViewModel.enableEmailButton())
+            }
 
             AppButton(
-                onClick = remember {
-                    {
-                        authViewModel.onAction(AuthActions.OnNavigateTo)
-                    }
-                },
+                onClick = onNavigateTo,
                 title = "Tiếp tục",
-                isEnable = authViewModel.enableEmailButton(),
+                isEnable = isEnable,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = DarkOrange,
                     contentColor = Color.Black,
@@ -169,7 +183,7 @@ private fun ScreenContent(
 
 @Composable
 private fun HandleNavigation(
-    uiState: UiState,
+    uiState: () -> UiState,
     navController: NavController,
     authViewModel: AuthViewModel,
 ) {
@@ -191,19 +205,18 @@ private fun HandleNavigation(
         }
     }
 
-    LaunchedEffect(uiState) {
+    LaunchedEffect(uiState()) {
 
         when {
-            uiState.isNavigate -> {
+            uiState().isNavigate -> {
                 NavigationUtils.navigateTo(navController, Screen.PasswordScreen.route)
                 authViewModel.onAction(AuthActions.UpdateNavigationStatus)
             }
 
-            uiState.isBack -> {
+            uiState().isBack -> {
                 authViewModel.onAction(AuthActions.Reset)
                 NavigationUtils.navigateBack(navController)
             }
         }
     }
-
 }

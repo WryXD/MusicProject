@@ -24,7 +24,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -244,6 +246,10 @@ private fun ScreenContent(
         Spacer(Modifier.height(16.dp))
 
         // Button to next screen
+        var isEnable by remember {
+            mutableStateOf(authViewModel.enablePasswordButton())
+        }
+
         AppButton(
             onClick = remember {
                 {
@@ -257,7 +263,7 @@ private fun ScreenContent(
                 disabledContainerColor = Color.DarkGray,
                 disabledContentColor = DarkWhite
             ),
-            isEnable = authViewModel.enablePasswordButton(),
+            isEnable = isEnable,
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(56.dp)

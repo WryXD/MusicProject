@@ -188,7 +188,7 @@ fun AppPolicy(
 fun AppButton(
     onClick: () -> Unit,
     title: String,
-    isEnable: Boolean = true,
+    isEnable: Boolean,
     colors: ButtonColors,
     style: TextStyle = RobotoFont.bodySmall,
     modifier: Modifier,
